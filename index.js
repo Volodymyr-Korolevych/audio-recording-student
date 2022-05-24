@@ -40,7 +40,8 @@ app.get('/records', async (req, res) => {
   }
 })
 
-const port = process.env.PORT || 8082
-app.listen(port, () => {
+const PORT = process.env.PORT || 8082
+const host = '0.0.0.0'
+app.listen(port, host, () => {
   console.log('🚀')
 })
