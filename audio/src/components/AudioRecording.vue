@@ -4,41 +4,7 @@
       <h1>Record App</h1>
     </header>
     <v-row>
-      <v-col cols="8">
-        <section>
-          <h2>My Records</h2>
-          <div id="records_box" ref="rbox">
-            <template v-if="files.length">
-              <div 
-                v-for="(file, index) in files" 
-                :key="index"
-                style="display: flex;width: max-content;flex-wrap: wrap;"
-              >
-                <div class="audio_item">
-                  <audio
-                    :src="file.src"
-                    @ended="
-                      ({ currentTarget }) => {
-                        currentTarget.parentElement.querySelector('img').src =
-                          'img/play.png';
-                      }
-                    "
-                  />
-                  <button class="btn" @click="playRecord">
-                    <img src="/img/play.png" />
-                  </button>
-                  <p>{{ file.name }}</p>
-                </div>
-              </div>
-            </template>
-            <div v-else>
-              <p>No records. Create one</p>
-            </div>
-          </div>
-        </section>
-      </v-col>
-
-      <v-col cols="4">
+      <v-col cols="6">
         <button class="btn" id="record_btn">
           <img src="/img/microphone.png" alt="record" />
         </button>
@@ -51,6 +17,52 @@
           </div>
         </section>
       </v-col>
+
+      <v-col cols="6">
+        <section>
+          <h2>My Records</h2>
+          <div id="records_box" ref="rbox">
+            <template v-if="files.length">
+              <div
+                v-for="(file, index) in files"
+                :key="index"
+                style="display: flex; width: max-content; flex-wrap: wrap"
+              >
+                <div class="audio_item">
+                  <p>{{ file.name }}</p>
+
+                  <audio
+                    :src="file.src"
+                    @ended="
+                      ({ currentTarget }) => {
+                        currentTarget.parentElement.querySelector('img').src =
+                          'img/play.png';
+                      }
+                    "
+                  />
+                  <button
+                    class="btn"
+                    @click="playRecord"
+                    title="Програвання файлу"
+                  >
+                    <img src="/img/play.png" />
+                  </button>
+                  <button
+                    class="btn"
+                    @click="removeFile(index)"
+                    title="Вилучення файлу"
+                  >
+                    <img src="/img/remove.png" />
+                  </button>
+                </div>
+              </div>
+            </template>
+            <div v-else>
+              <p>No records. Create one</p>
+            </div>
+          </div>
+        </section>
+      </v-col>
     </v-row>
     <footer />
   </v-container>
@@ -58,7 +70,7 @@
 <script>
 export default {
   data: () => ({
-    files_list: [],
+    files_list: ["1653329498185-запис.mp3", "1653419329141-ще запис.mp3"],
     reload_needed: 1234,
   }),
   async mounted() {
@@ -82,7 +94,7 @@ export default {
   },
   watch: {
     async reload_needed(o, n) {
-      console.error("RELOAD NEEDED", o, n);
+      console.log("RELOAD NEEDED", o, n);
       this.reload_needed = 1;
       this.files_list = await this.fetchRecords();
       console.log(this.files_list);
@@ -234,6 +246,19 @@ export default {
         playBtn.firstElementChild.src = "img/play.png";
       }
     },
+    async removeFile(ind) {
+      const file_name = this.files_list[ind];
+      const requestOptions = {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ file: file_name }),
+      };
+      await fetch("/remove", requestOptions)
+      console.log('removeFile done-1')
+      // this.files_list = await this.fetchRecords();
+      // console.log('removeFile done-2')
+      this.reload_needed = 2000
+    },
   },
 };
 </script>
@@ -352,7 +377,7 @@ img {
 #records_box {
   @include flex-center;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: flex-end;
 }
 
 .audio_item {

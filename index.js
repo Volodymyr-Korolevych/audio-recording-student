@@ -1,7 +1,7 @@
 import express from 'express'
 import { dirname } from 'path'
 import { fileURLToPath } from 'url'
-import { promises as fs } from 'fs'
+import { unlinkSync, promises as pfs } from 'fs'
 import multer from 'multer'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -18,6 +18,7 @@ const upload = multer({
 })
 
 const app = express()
+app.use(express.json())
 app.use(express.static('audio/dist'))
 app.use(express.static('uploads'))
 
@@ -32,13 +33,21 @@ app.post('/save', upload.single('audio'), (req, res) => {
 app.get('/records', async (req, res) => {
   try {
     console.log('/records')
-    let files = await fs.readdir(`${__dirname}/uploads`)
-    //files = files.filter((fileName) => fileName.split('.')[1] === 'oga')
+    let files = await pfs.readdir(`${__dirname}/uploads`)
     res.status(200).json(files)
   } catch (e) {
     console.log(e)
   }
 })
+
+app.post('/remove', async (req, res) => {
+  const file = req.body.file
+  console.log('server/remove', file)
+  const filePath = `${__dirname}/uploads/${file}`
+  await unlinkSync(filePath)
+  res.sendStatus(201)
+})
+
 
 const port = process.env.PORT || 8082
 const host = '0.0.0.0'

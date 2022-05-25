@@ -28,6 +28,7 @@
     "multer": "^1.4.3"
   },
   "scripts": {
+    "serve": "cd audio && yarn serve",
     "build": "cd audio && yarn build",
     "start": "node index.js"
   }
