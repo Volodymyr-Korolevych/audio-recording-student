@@ -1,92 +1,154 @@
 <template>
   <v-container fluid style="width: 90vw">
-    <header>
-      <h1>Record App</h1>
-    </header>
     <v-row>
-      <v-col cols="6">
-        <button class="btn" id="record_btn">
-          <img src="/img/microphone.png" alt="record" />
-        </button>
-        <section id="record_box">
-          <h2>My Record</h2>
-          <div id="audio_box" ref="abox"></div>
-          <div class="action_box">
-            <button class="btn btn_success" id="save_btn">Save</button>
-            <button class="btn btn_danger" id="remove_btn">Remove</button>
-          </div>
-        </section>
+      <v-col cols="7">
+        <v-card style="background: #1b347c">
+          <v-card-title
+            flat
+            class="ma-3 text-h4 text-center"
+            style="display: block"
+            >Запис звуку</v-card-title
+          >
+          <v-card-title class="ma-3 text-center" style="display: block"
+            >Натисніть кнопку, щоб розпочати</v-card-title
+          >
+          <v-card-text>
+            <button class="btn" id="record_btn">
+              <img src="/img/microphone.png" alt="record" />
+            </button>
+            <v-row id="record_box">
+              <v-col>
+                <v-card
+                  elevation="4"
+                  class="mx-auto"
+                  max-width="344"
+                  outlined
+                  style="background: #1b347c"
+                >
+                  <v-card-title>Блок відтворення</v-card-title>
+                  <v-card-text>
+                    <div id="audio_box" ref="abox" height="800"></div>
+                  </v-card-text>
+                  <v-card-actions class="action_box flex-wrap">
+                    <v-text-field
+                      label="Вкажіть назву файлу"
+                      style="width: 20vw"
+                      id="fileName"
+                    ></v-text-field>
+                    <v-spacer />
+                    <v-btn
+                      class="btn_success mx-4"
+                      id="save_btn"
+                      style="background: white; color: black; font-weight: 600"
+                      >Зберегти</v-btn
+                    >
+                    <v-btn class="btn_danger mx-4" id="remove_btn"
+                      >Вилучити</v-btn
+                    >
+                  </v-card-actions>
+                </v-card>
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
       </v-col>
 
-      <v-col cols="6">
-        <section>
-          <h2>My Records</h2>
-          <div id="records_box" ref="rbox">
+      <v-col cols="5">
+        <v-card style="background: #1b347c">
+          <v-card-title
+            flat
+            class="ma-3 text-h4 text-center"
+            style="display: block"
+            >Мої записи</v-card-title
+          >
+          <div id="records_box" ref="rbox" style="align-items: center">
             <template v-if="files.length">
-              <div
-                v-for="(file, index) in files"
-                :key="index"
-                style="display: flex; width: max-content; flex-wrap: wrap"
-              >
-                <div class="audio_item">
-                  <p>{{ file.name }}</p>
-
-                  <audio
-                    :src="file.src"
-                    @ended="
-                      ({ currentTarget }) => {
-                        currentTarget.parentElement.querySelector('img').src =
-                          'img/play.png';
-                      }
-                    "
-                  />
-                  <button
-                    class="btn"
-                    @click="playRecord"
-                    title="Програвання файлу"
-                  >
-                    <img src="/img/play.png" />
-                  </button>
-                  <button
-                    class="btn"
-                    @click="removeFile(index)"
-                    title="Вилучення файлу"
-                  >
-                    <img src="/img/remove.png" />
-                  </button>
-                </div>
-              </div>
+              <v-simple-table style="background: #1b347c; width: 100%">
+                <template v-slot:default>
+                  <tbody>
+                    <tr v-for="(item, index) in files" :key="item.audioName">
+                      <td style="width: 89px; font-size: small; padding: 0">
+                        {{ item.day }}
+                      </td>
+                      <td style="width: 43%; text-align: left">
+                        {{ item.audioName }}
+                      </td>
+                      <td style="width: 5%">{{ item.dur }}</td>
+                      <td class="audio_item">
+                        <audio
+                          :src="item.src"
+                          @ended="
+                            ({ currentTarget }) => {
+                              currentTarget.parentElement.querySelector(
+                                'img'
+                              ).src = 'img/play.png';
+                            }
+                          "
+                        />
+                        <button
+                          class="btn"
+                          @click="playRecord"
+                          title="Програвання файлу"
+                        >
+                          <img src="/img/play.png" />
+                        </button>
+                        <button
+                          class="btn"
+                          @click="removeFile(index)"
+                          title="Вилучення файлу"
+                        >
+                          <img src="/img/remove.png" />
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </template>
+              </v-simple-table>
             </template>
-            <div v-else>
-              <p>No records. Create one</p>
-            </div>
+            <template v-else>
+              <v-card-title class="ma-3 text-center"
+                >У вас немає збережених записів</v-card-title
+              >
+            </template>
           </div>
-        </section>
+        </v-card>
       </v-col>
     </v-row>
     <footer />
   </v-container>
 </template>
 <script>
+import moment from "moment";
+moment.locale("uk");
 export default {
   data: () => ({
-    files_list: ["1653329498185-запис.mp3", "1653419329141-ще запис.mp3"],
+    files_list: ["1653329498185-15-запис.mp3", "1653419329141-80-ще запис.mp3"],
     reload_needed: 1234,
   }),
   async mounted() {
     this.files_list = await this.fetchRecords();
-    console.log(this.files_list);
+    console.log("mounted", this.files_list);
     this.script(this);
   },
   computed: {
     files() {
       if (this.files_list.length) {
         return this.files_list.map((src) => {
-          const [date, audioName] = src.replace(".mp3", "").split("-");
+          const [date, duration, audioName] = src
+            .replace(".mp3", "")
+            .split("-");
           const audioDate = new Date(+date).toLocaleString();
+          const day = moment(audioDate).format("D MMM HH:mm");
+          // const time = moment(audioDate).format("");
+          const minutes = Math.floor(duration / 60);
+          const seconds = duration - 60 * minutes;
           return {
             src,
             name: `${audioDate}${audioName ? ` - ${audioName}` : ""}`,
+            audioName,
+            day,
+            // time,
+            dur: minutes + ":" + seconds,
           };
         });
       } else return [];
@@ -110,6 +172,7 @@ export default {
       const save_btn = document.querySelector("#save_btn");
       const audio_box = document.querySelector("#audio_box");
       const record_box = document.querySelector("#record_box");
+      const fileName = document.querySelector("#fileName");
       let _vm = vm;
 
       console.log(_vm);
@@ -190,8 +253,11 @@ export default {
 
       async function saveRecord() {
         const formData = new FormData();
-        let audioName = prompt("Name?");
-        audioName = audioName ? Date.now() + "-" + audioName : Date.now();
+        const duration = Math.round(audio_box.children[0].duration);
+        let audioName = fileName.value;
+        audioName = audioName
+          ? Date.now() + "-" + duration + "-" + audioName
+          : Date.now() + "-" + duration + -+"аудіозапис";
         formData.append("audio", audioBlob, audioName);
 
         try {
@@ -253,24 +319,17 @@ export default {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ file: file_name }),
       };
-      await fetch("/remove", requestOptions)
-      console.log('removeFile done-1')
+      await fetch("/remove", requestOptions);
+      console.log("removeFile done-1");
       // this.files_list = await this.fetchRecords();
       // console.log('removeFile done-2')
-      this.reload_needed = 2000
+      this.reload_needed = 2000;
     },
   },
 };
 </script>
 <style lang="scss">
 @import url("https://fonts.googleapis.com/css2?family=Montserrat&display=swap");
-
-$primary: #0275d8;
-$success: #5cb85c;
-$info: #5bc0de;
-$danger: #d9534f;
-$dark: #292b2c;
-$light: #f7f7f7;
 
 @mixin flex-center {
   display: flex;
@@ -284,7 +343,6 @@ $light: #f7f7f7;
   box-sizing: border-box;
   font-family: "Montserrat", sans-serif;
   font-size: 1rem;
-  color: $dark;
 }
 
 body {
@@ -320,14 +378,14 @@ h2 {
   transition: 0.2s ease-in-out;
 
   &_success {
-    background-color: $success;
+    background-color: #5cb85c;
   }
   &_danger {
-    background-color: $danger;
+    background-color: #d9534f;
   }
   &:hover {
-    background-color: $info;
-    color: $dark;
+    background-color: #5bc0de;
+    color: #292b2c;
   }
 }
 
@@ -389,7 +447,7 @@ img {
   .btn {
     @include flex-center;
     width: 50px;
-    background-color: $primary;
+    background-color: #0275d8;
     margin-right: 0.5rem;
   }
 }

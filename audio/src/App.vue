@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app style="background:#1b347c">
     <v-main>
       <audio-recording />
     </v-main>
