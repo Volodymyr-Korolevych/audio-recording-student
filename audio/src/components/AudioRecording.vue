@@ -1,15 +1,15 @@
 <template>
-  <v-container fluid style="width: 90vw">
+  <v-container fluid style="background: #1b347c">
     <v-row>
-      <v-col cols="7">
-        <v-card style="background: #1b347c">
+      <v-col cols="6">
+        <div class="v-card" style="background: #1b347c">
           <v-card-title
             flat
             class="ma-3 text-h4 text-center"
             style="display: block"
             >Запис звуку</v-card-title
           >
-          <v-card-title class="ma-3 text-center" style="display: block"
+          <v-card-title class="ma-3 text-center" style="display: block" id="record_text"
             >Натисніть кнопку, щоб розпочати</v-card-title
           >
           <v-card-text>
@@ -22,7 +22,6 @@
                   elevation="4"
                   class="mx-auto"
                   max-width="344"
-                  outlined
                   style="background: #1b347c"
                 >
                   <v-card-title>Блок відтворення</v-card-title>
@@ -50,11 +49,11 @@
               </v-col>
             </v-row>
           </v-card-text>
-        </v-card>
+        </div>
       </v-col>
 
-      <v-col cols="5">
-        <v-card style="background: #1b347c">
+      <v-col cols="6">
+        <div class="v-card" style="background: #1b347c">
           <v-card-title
             flat
             class="ma-3 text-h4 text-center"
@@ -111,7 +110,7 @@
               >
             </template>
           </div>
-        </v-card>
+        </div>
       </v-col>
     </v-row>
     <footer />
@@ -122,7 +121,7 @@ import moment from "moment";
 moment.locale("uk");
 export default {
   data: () => ({
-    files_list: ["1653329498185-15-запис.mp3", "1653419329141-80-ще запис.mp3"],
+    files_list: [], // ["1653329498185-15-запис.mp3", "1653419329141-80-ще запис.mp3"],
     reload_needed: 1234,
   }),
   async mounted() {
@@ -137,8 +136,8 @@ export default {
           const [date, duration, audioName] = src
             .replace(".mp3", "")
             .split("-");
-          const audioDate = new Date(+date).toLocaleString();
-          const day = moment(audioDate).format("D MMM HH:mm");
+          const audioDate = new Date(+date);
+          const day = moment(audioDate.toISOString()).format("D MMM HH:mm");
           // const time = moment(audioDate).format("");
           const minutes = Math.floor(duration / 60);
           const seconds = duration - 60 * minutes;
@@ -167,6 +166,7 @@ export default {
       let chunks = [];
       let mediaRecorder = null;
       let audioBlob = null;
+      const record_text = document.querySelector("#record_text");
       const record_btn = document.querySelector("#record_btn");
       const remove_btn = document.querySelector("#remove_btn");
       const save_btn = document.querySelector("#save_btn");
@@ -203,16 +203,19 @@ export default {
 
         console.log("startRecord:", event, _vm.$refs);
 
-        if (!navigator.mediaDevices && !navigator.mediaDevices.getUserMedia) {
-          return console.warn("Not supported");
+        if (!navigator.mediaDevices && !navigator.mediaDevices?.getUserMedia) {
+          console.warn("Not supported");
         }
         // console.log("startRecord button pressed", mediaRecorder, mediaRecorder?.state)
 
         recImg.src = `img/${
-          mediaRecorder && mediaRecorder.state === "recording"
+          mediaRecorder && mediaRecorder?.state === "recording"
             ? "microphone"
             : "stop"
         }.png`;
+        record_text.textContent =  mediaRecorder && mediaRecorder?.state === "recording"
+            ? "Натисніть кнопку, щоб розпочати"
+            : "Йде запис!"
 
         if (!mediaRecorder) {
           try {
@@ -228,6 +231,7 @@ export default {
           } catch (e) {
             console.error(e);
             recImg.src = " img/microphone.png";
+            record_text.textContent = "Натисніть кнопку, щоб розпочати"
           }
         } else {
           mediaRecorder.stop();
@@ -256,9 +260,10 @@ export default {
         const duration = Math.round(audio_box.children[0].duration);
         let audioName = fileName.value;
         audioName = audioName
-          ? Date.now() + "-" + duration + "-" + audioName
-          : Date.now() + "-" + duration + -+"аудіозапис";
+          ? Date.now() + "-" + duration + "-" + audioName.replaceAll('-', '_')
+          : Date.now() + "-" + duration + " - аудіозапис";
         formData.append("audio", audioBlob, audioName);
+        fileName.value = ''
 
         try {
           await fetch("/save", {
@@ -280,14 +285,9 @@ export default {
         audioBlob = null;
       }
 
-      function removeRecord() {
-        if (confirm("Sure?")) {
-          resetRecord();
-        }
-      }
       record_btn.onclick = startRecord;
       save_btn.onclick = saveRecord;
-      remove_btn.onclick = removeRecord;
+      remove_btn.onclick = resetRecord;
     },
     //--------------------------------------------------------
     async fetchRecords() {
@@ -384,7 +384,7 @@ h2 {
     background-color: #d9534f;
   }
   &:hover {
-    background-color: #5bc0de;
+    background-color: #5bc0de !important;
     color: #292b2c;
   }
 }
@@ -392,6 +392,7 @@ h2 {
 #record_btn {
   width: 100px;
   border-radius: 15%;
+  background-color: #ffffff1f;
 }
 
 img {
