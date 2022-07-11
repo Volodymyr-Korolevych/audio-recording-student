@@ -1,23 +1,31 @@
 <template>
-  <v-app style="width:100%;background:#1b347c">
+  <v-app>
     <v-main>
-      <audio-recording />
+      <v-container fluid>
+        <v-row>
+          <v-col cols="6">
+            <audio-recording />
+          </v-col>
+          <v-col cols="6">
+            <audio-playback />
+          </v-col>
+        </v-row>
+      </v-container>
     </v-main>
   </v-app>
 </template>
 
 <script>
-import AudioRecording from "./components/AudioRecording";
-
+import AudioPlayback from './components/AudioPlayback'
+import AudioRecording from './components/AudioRecording'
 export default {
   name: "App",
-
   components: {
-     AudioRecording,
-  },
-
-  data: () => ({
-    //
-  }),
-};
+    AudioRecording,
+    AudioPlayback
+  }
+}
 </script>
+<style lang="scss">
+@import './styles/app.scss';
+</style>

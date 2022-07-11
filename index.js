@@ -51,5 +51,5 @@ app.post('/remove', async (req, res) => {
 const port = process.env.PORT || 8082
 const host = '0.0.0.0'
 app.listen(port, host, () => {
-  console.log('🚀')
+  console.log('🚀 listen to port ', port)
 })

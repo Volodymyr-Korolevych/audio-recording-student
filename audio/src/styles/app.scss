@@ -1,0 +1,59 @@
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+#app {
+    background-color: $bg-color;
+    width:100%;
+}
+.v-card.v-sheet.theme--dark {
+    background-color: inherit;
+    border: none;
+}
+.v-card__text {
+    text-align: center;
+}
+#vtable {
+    background-color: inherit;
+    width: 100%;
+}
+#vtable table {
+    width: 86%;
+    table-layout: fixed;
+}
+#vtable tr:hover {
+    background-color: lighten($bg-color, 20%);
+}
+#vtable button {
+    height: 33px;
+    min-width:auto;
+    width: 45px;
+    margin: 8px;
+    background-color: lighten($bg-color,10%);
+}
+#vtable button img {
+    height:20px;
+    width:20px;
+} 
+#vtable tr td {
+    padding: 0;
+}
+#vtable tr td:nth-child(1) {
+    width: 16%;
+    font-size: small; 
+    padding-left: 25px;
+}
+#vtable tr td:nth-child(2) {
+    width: 50%; 
+    text-align: left;
+    padding: 0 20px;
+}
+#vtable tr td:nth-child(3) {
+    width: 9%;
+}   
+#vtable tr td:nth-child(4) {
+    width: 28%;
+}
+
